@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commerciq — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg:#09090b;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.07);
+            --text:#f4f4f5;--text2:#a1a1aa;--text3:#71717a;
+            --grad:linear-gradient(135deg,#7c3aed,#db2777);
+            --ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;
+            --ff:'DM Sans',system-ui,sans-serif;--fh:'Space Grotesk',var(--ff);
+            --r:14px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:var(--ff);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.55}
+
+        /* Gradient BG */
+        .bg{position:fixed;inset:0;z-index:-10;overflow:hidden;pointer-events:none}
+        .bg .o{position:absolute;border-radius:50%;filter:blur(120px);opacity:.4}
+        .bg .o1{width:55vmax;height:55vmax;top:-15%;left:-5%;background:#7c3aed;animation:d1 20s ease-in-out infinite alternate}
+        .bg .o2{width:50vmax;height:50vmax;bottom:-20%;right:-5%;background:#db2777;animation:d2 24s ease-in-out infinite alternate}
+        @keyframes d1{to{transform:translate(10vw,12vh) scale(1.1)}}
+        @keyframes d2{to{transform:translate(-8vw,-10vh) scale(1.15)}}
+
+        /* Layout */
+        .shell{max-width:1100px;margin:0 auto;padding:32px 20px}
+
+        /* Header */
+        .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-icon{width:38px;height:38px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff}
+        .brand h1{font-family:var(--fh);font-size:1.3rem;font-weight:700}
+        .brand h1 span{font-weight:400;color:var(--text2);font-size:.9rem;margin-left:8px}
+        .back-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.85rem;font-weight:600;color:var(--text2);background:var(--surface);border:1px solid var(--border);text-decoration:none;transition:all .2s}
+        .back-link:hover{color:#fff;border-color:rgba(255,255,255,.15)}
+
+        /* Stats Row */
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+        .stat-card{padding:20px;border-radius:var(--r);background:rgba(18,18,20,.55);backdrop-filter:blur(30px);border:1px solid var(--border)}
+        .stat-card .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:600;margin-bottom:6px}
+        .stat-card .val{font-family:var(--fh);font-size:1.6rem;font-weight:700}
+        .stat-card .val.purple{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+        /* Search Bar */
+        .search-bar{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+        .search-box{flex:1;min-width:220px;position:relative}
+        .search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.85rem}
+        .search-box input{width:100%;padding:12px 14px 12px 40px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:.9rem}
+        .search-box input:focus{outline:none;border-color:rgba(124,58,237,.5);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+        .search-box input::placeholder{color:var(--text3)}
+        .filter-select{padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:.85rem;font-family:var(--fh);font-weight:600}
+        .filter-select option{background:#18181b;color:#fff}
+        .btn-clear{padding:10px 18px;border-radius:8px;font-family:var(--fh);font-weight:600;font-size:.82rem;color:#fca5a5;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);cursor:pointer;transition:all .2s}
+        .btn-clear:hover{background:rgba(239,68,68,.18);color:#fff}
+
+        /* Table */
+        .table-wrap{border-radius:var(--r);border:1px solid var(--border);overflow:hidden;background:rgba(18,18,20,.55);backdrop-filter:blur(30px)}
+        table{width:100%;border-collapse:collapse;font-size:.85rem}
+        thead{background:rgba(255,255,255,.03)}
+        th{text-align:left;padding:14px 16px;font-family:var(--fh);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);border-bottom:1px solid var(--border)}
+        td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+        tr:last-child td{border-bottom:none}
+        tr:hover td{background:rgba(255,255,255,.02)}
+
+        .student-name{font-weight:600;color:#fff}
+        .student-phone{color:var(--text2);font-size:.8rem}
+        .subject-tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+        .subject-tag.acc{background:rgba(245,158,11,.1);color:#f59e0b}
+        .subject-tag.bst{background:rgba(129,140,248,.1);color:#818cf8}
+        .subject-tag.eco{background:rgba(52,211,153,.1);color:#34d399}
+        .subject-tag.mix{background:rgba(192,132,252,.1);color:#c084fc}
+
+        .score-badge{font-family:var(--fh);font-weight:700;padding:4px 10px;border-radius:6px;font-size:.82rem}
+        .score-badge.high{background:rgba(34,197,94,.1);color:var(--ok)}
+        .score-badge.mid{background:rgba(245,158,11,.1);color:var(--warn)}
+        .score-badge.low{background:rgba(239,68,68,.1);color:var(--bad)}
+
+        .date-cell{font-size:.8rem;color:var(--text2)}
+
+        .empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+        .empty-state i{font-size:2.5rem;margin-bottom:14px;display:block;opacity:.4}
+        .empty-state h3{font-family:var(--fh);font-size:1.1rem;margin-bottom:6px;color:var(--text2)}
+
+        /* Footer */
+        .footer{text-align:center;padding:28px 20px;font-size:.72rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+        .footer strong{background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+
+        /* Responsive */
+        @media(max-width:700px){
+            .stats{grid-template-columns:repeat(2,1fr)}
+            .table-wrap{overflow-x:auto}
+            table{min-width:700px}
+        }
+
+        ::-webkit-scrollbar{width:7px;height:7px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:4px}
+    </style>
+</head>
+<body>
+    <div class="bg" aria-hidden="true">
+        <div class="o o1"></div>
+        <div class="o o2"></div>
+    </div>
+
+    <div class="shell">
+        <!-- Header -->
+        <div class="top">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h1>Admin Panel <span>Commerciq</span></h1>
+            </div>
+            <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Quiz</a>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="stats" id="stats-row">
+            <div class="stat-card">
+                <div class="label">Total Attempts</div>
+                <div class="val purple" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Unique Students</div>
+                <div class="val" id="stat-students">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Avg Score</div>
+                <div class="val" id="stat-avg" style="color:#22c55e">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Top Score</div>
+                <div class="val" id="stat-top" style="color:#f59e0b">0%</div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="search-bar">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="Search by name or phone number…">
+            </div>
+            <select class="filter-select" id="filter-subject">
+                <option value="all">All Subjects</option>
+                <option value="Accountancy">Accountancy</option>
+                <option value="Business Studies">Business Studies</option>
+                <option value="Economics">Economics</option>
+                <option value="Mixed Commerce">Mixed Commerce</option>
+            </select>
+            <button class="btn-clear" id="btn-clear-data"><i class="fa-solid fa-trash"></i> Clear All Data</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Correct / Total</th>
+                        <th>Accuracy</th>
+                        <th>Time</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="attempts-tbody">
+                    <!-- Dynamic rows -->
+                </tbody>
+            </table>
+            <div class="empty-state hidden" id="empty-state">
+                <i class="fa-solid fa-inbox"></i>
+                <h3>No attempts found</h3>
+                <p>Student quiz attempts will appear here automatically.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">Built by <strong>Rajesh Devlopzz</strong></footer>
+
+    <script>
+    const KEY = 'commerciq_attempts';
+
+    function getAttempts() {
+        try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+        catch { return []; }
+    }
+
+    function render() {
+        const attempts = getAttempts();
+        const search = document.getElementById('search-input').value.trim().toLowerCase();
+        const subjectFilter = document.getElementById('filter-subject').value;
+
+        // Filter
+        let filtered = attempts.filter(a => {
+            const matchSearch = !search ||
+                (a.name && a.name.toLowerCase().includes(search)) ||
+                (a.phone && a.phone.includes(search)) ||
+                (a.id && a.id.includes(search));
+            const matchSubject = subjectFilter === 'all' || a.subject === subjectFilter;
+            return matchSearch && matchSubject;
+        });
+
+        // Sort newest first
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Stats
+        document.getElementById('stat-total').textContent = attempts.length;
+        const uniquePhones = new Set(attempts.map(a => a.phone));
+        document.getElementById('stat-students').textContent = uniquePhones.size;
+        const avg = attempts.length ? Math.round(attempts.reduce((s, a) => s + (a.percent || 0), 0) / attempts.length) : 0;
+        document.getElementById('stat-avg').textContent = avg + '%';
+        const top = attempts.length ? Math.max(...attempts.map(a => a.percent || 0)) : 0;
+        document.getElementById('stat-top').textContent = top + '%';
+
+        // Table
+        const tbody = document.getElementById('attempts-tbody');
+        const empty = document.getElementById('empty-state');
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+        empty.classList.add('hidden');
+
+        tbody.innerHTML = filtered.map((a, i) => {
+            const subjectClass = a.subject === 'Accountancy' ? 'acc' :
+                                 a.subject === 'Business Studies' ? 'bst' :
+                                 a.subject === 'Economics' ? 'eco' : 'mix';
+
+            const scoreClass = a.percent >= 75 ? 'high' : a.percent >= 50 ? 'mid' : 'low';
+
+            const dateStr = a.date ? new Date(a.date).toLocaleString('en-IN', {
+                day:'2-digit', month:'short', year:'numeric',
+                hour:'2-digit', minute:'2-digit', hour12:true
+            }) : '—';
+
+            return `<tr>
+                <td style="color:var(--text3);font-weight:600">${i + 1}</td>
+                <td>
+                    <div class="student-name">${escHtml(a.name || '—')}</div>
+                    <div class="student-phone">${escHtml(a.phone || '—')}</div>
+                </td>
+                <td><span class="subject-tag ${subjectClass}">${escHtml(a.subject || '—')}</span></td>
+                <td><span class="score-badge ${scoreClass}">${a.percent ?? 0}%</span></td>
+                <td>${a.correct ?? 0} / ${a.total ?? 0}</td>
+                <td>${a.accuracy ?? 0}%</td>
+                <td>${escHtml(a.time || '—')}</td>
+                <td class="date-cell">${dateStr}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    // Events
+    document.getElementById('search-input').addEventListener('input', render);
+    document.getElementById('filter-subject').addEventListener('change', render);
+    document.getElementById('btn-clear-data').addEventListener('click', () => {
+        if (confirm('Are you sure? This will permanently delete ALL student attempt records.')) {
+            localStorage.removeItem(KEY);
+            render();
+        }
+    });
+
+    // Init
+    render();
+    </script>
+</body>
+</html>
