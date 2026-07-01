@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commerciq — Class 12 Notes</title>
+    <meta name="description" content="Free Class 12 Commerce notes for Accountancy, Business Studies & Economics — simple, exam-ready, with diagrams.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="notes-style.css">
+</head>
+<body>
+    <!-- Gradient BG -->
+    <div class="gradient-bg" aria-hidden="true">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="grain-overlay"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="header-brand" href="index.html">
+                <span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                <span class="brand-name">Commerciq</span>
+            </a>
+            <div class="header-right">
+                <a href="index.html" class="nav-link"><i class="fa-solid fa-gamepad"></i> Quiz</a>
+                <a href="notes.html" class="nav-link active"><i class="fa-solid fa-book-open"></i> Notes</a>
+                <a href="admin.html" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="shell">
+        <!-- Hero -->
+        <div class="notes-hero">
+            <p class="eyebrow">Class 12 Commerce</p>
+            <h1>Study Notes</h1>
+            <p class="subtitle">Simple, exam-ready notes with diagrams and formulas. Select a subject to start reading.</p>
+        </div>
+
+        <!-- Subject Tabs -->
+        <div class="tab-bar" id="tab-bar">
+            <button class="tab active" data-subject="accountancy">
+                <i class="fa-solid fa-calculator"></i> Accountancy
+            </button>
+            <button class="tab" data-subject="bst">
+                <i class="fa-solid fa-briefcase"></i> Business Studies
+            </button>
+            <button class="tab" data-subject="economics">
+                <i class="fa-solid fa-chart-line"></i> Economics
+            </button>
+        </div>
+
+        <!-- Notes Content Area -->
+        <div class="notes-content" id="notes-content">
+            <!-- Dynamically rendered -->
+        </div>
+    </main>
+
+    <footer class="watermark">Built by <strong>Rajesh Devlopzz</strong></footer>
+
+    <!-- Notes Data Files -->
+    <script src="notes-accountancy.js"></script>
+    <script src="notes-bst.js"></script>
+    <script src="notes-economics.js"></script>
+
+    <script>
+    // ========== NOTES RENDERER ==========
+    const SUBJECTS = {
+        accountancy: () => typeof ACCOUNTANCY_NOTES !== 'undefined' ? ACCOUNTANCY_NOTES : [],
+        bst: () => typeof BST_NOTES !== 'undefined' ? BST_NOTES : [],
+        economics: () => typeof ECONOMICS_NOTES !== 'undefined' ? ECONOMICS_NOTES : []
+    };
+
+    let activeSubject = 'accountancy';
+    let openUnits = new Set();
+    let openTopics = new Set();
+
+    function renderNotes() {
+        const container = document.getElementById('notes-content');
+        const units = SUBJECTS[activeSubject]();
+
+        if (!units || units.length === 0) {
+            container.innerHTML = `
+                <div class="empty-notes">
+                    <i class="fa-solid fa-book"></i>
+                    <h3>Notes loading…</h3>
+                    <p>Refresh the page if notes don't appear.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = units.map((unit, ui) => {
+            const unitKey = `${activeSubject}-u${ui}`;
+            const isUnitOpen = openUnits.has(unitKey);
+
+            return `
+            <div class="unit-card ${isUnitOpen ? 'open' : ''}">
+                <button class="unit-head" data-key="${unitKey}">
+                    <div class="unit-head-left">
+                        <span class="unit-num">Chapter ${ui + 1}</span>
+                        <h2 class="unit-title">${unit.title}</h2>
+                    </div>
+                    <div class="unit-head-right">
+                        <i class="fa-solid fa-chevron-down unit-chevron"></i>
+                    </div>
+                </button>
+                <div class="unit-body" ${isUnitOpen ? 'style="display:block"' : ''}>
+                    <div class="topic-content" style="padding-top: 16px;">
+                        ${unit.content}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Attach listeners
+        container.querySelectorAll('.unit-head').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.key;
+                if (openUnits.has(key)) openUnits.delete(key);
+                else openUnits.add(key);
+                renderNotes();
+            });
+        });
+
+        container.querySelectorAll('.topic-head').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.key;
+                if (openTopics.has(key)) openTopics.delete(key);
+                else openTopics.add(key);
+                renderNotes();
+            });
+        });
+    }
+
+    // Tab switching
+    document.getElementById('tab-bar').addEventListener('click', (e) => {
+        const tab = e.target.closest('.tab');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeSubject = tab.dataset.subject;
+        openUnits.clear();
+        openTopics.clear();
+        renderNotes();
+    });
+
+    // Init
+    renderNotes();
+    </script>
+</body>
+</html>
